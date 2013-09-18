@@ -166,6 +166,7 @@ namespace Microsoft.AspNet.SignalR.Client
             TraceWriter = new DebugTextWriter();
             Headers = new HeaderDictionary(this);
             TransportConnectTimeout = TimeSpan.Zero;
+            ReconnectWindow = TimeSpan.Zero;
 
             // Current client protocol
             Protocol = new Version(1, 3);
@@ -176,6 +177,12 @@ namespace Microsoft.AspNet.SignalR.Client
         /// This value is modified by adding the server's TransportConnectTimeout configuration value.
         /// </summary>
         public TimeSpan TransportConnectTimeout { get; set; }
+
+        /// <summary>
+        /// The maximum amount of time a connection will allow to try and reconnect.
+        /// This value is equivalent to the summation of the servers disconnect and keep alive timeout values.
+        /// </summary>
+        public TimeSpan ReconnectWindow { get; set; }
 
         public Version Protocol { get; set; }
 
@@ -195,7 +202,7 @@ namespace Microsoft.AspNet.SignalR.Client
         }
 
         /// <summary>
-        /// Object to store the various keep alive timeout values
+        /// The timestamp of the last message received by the connection.
         /// </summary>
         DateTime IConnection.LastMessageAt
         {
@@ -417,6 +424,11 @@ namespace Microsoft.AspNet.SignalR.Client
                                 if (negotiationResponse.KeepAliveTimeout != null)
                                 {
                                     _keepAliveData = new KeepAliveData(TimeSpan.FromSeconds(negotiationResponse.KeepAliveTimeout.Value));
+                                    ReconnectWindow = _disconnectTimeout + _keepAliveData.Timeout;
+                                }
+                                else
+                                {
+                                    ReconnectWindow = _disconnectTimeout;
                                 }
 
                                 return StartTransport();
