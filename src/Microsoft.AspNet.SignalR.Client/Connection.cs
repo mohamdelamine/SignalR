@@ -597,7 +597,11 @@ namespace Microsoft.AspNet.SignalR.Client
                     _disconnectTimeoutOperation.Dispose();
                     _disconnectCts.Cancel();
                     _disconnectCts.Dispose();
-                    _monitor.Dispose();
+
+                    if (_monitor != null)
+                    {
+                        _monitor.Dispose();
+                    }
 
                     if (_transport != null)
                     {
