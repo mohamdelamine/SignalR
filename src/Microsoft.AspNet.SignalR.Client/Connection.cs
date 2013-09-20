@@ -414,7 +414,6 @@ namespace Microsoft.AspNet.SignalR.Client
                     return _connectTask;
                 }
 
-                _monitor = new HeartbeatMonitor(this, _stateLock);
                 _transport = transport;
 
                 _connectTask = Negotiate(transport);
@@ -443,16 +442,23 @@ namespace Microsoft.AspNet.SignalR.Client
                                 _disconnectTimeout = TimeSpan.FromSeconds(negotiationResponse.DisconnectTimeout);
                                 TransportConnectTimeout = TransportConnectTimeout + TimeSpan.FromSeconds(negotiationResponse.TransportConnectTimeout);
 
+                                // Default the beat interval to be 5 seconds in case keep alive is disabled.
+                                var beatInterval = TimeSpan.FromSeconds(5);
+
                                 // If we have a keep alive
                                 if (negotiationResponse.KeepAliveTimeout != null)
                                 {
                                     _keepAliveData = new KeepAliveData(TimeSpan.FromSeconds(negotiationResponse.KeepAliveTimeout.Value));
                                     _reconnectWindow = _disconnectTimeout + _keepAliveData.Timeout;
+
+                                    beatInterval = _keepAliveData.CheckInterval;
                                 }
                                 else
                                 {
                                     _reconnectWindow = _disconnectTimeout;
                                 }
+
+                                _monitor = new HeartbeatMonitor(this, _stateLock, beatInterval);
 
                                 return StartTransport();
                             })
