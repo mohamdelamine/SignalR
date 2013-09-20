@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.SignalR.Tests
 
                     connection.Reconnecting += () =>
                     {
-                        connection.ReconnectWindow = TimeSpan.FromSeconds(2);
+                        ((Client.IConnection)connection).ReconnectWindow = TimeSpan.FromMilliseconds(500);
                         reconnectWh.Set();
                     };
 
@@ -63,8 +63,8 @@ namespace Microsoft.AspNet.SignalR.Tests
 
                     host.Shutdown();
 
-                    Assert.True(reconnectWh.Wait(TimeSpan.FromSeconds(25)), "Reconnect never fired");
-                    Assert.True(disconnectWh.Wait(TimeSpan.FromSeconds(25)), "Closed never fired");
+                    Assert.True(reconnectWh.Wait(TimeSpan.FromSeconds(15)), "Reconnect never fired");
+                    Assert.True(disconnectWh.Wait(TimeSpan.FromSeconds(15)), "Closed never fired");
                 }
             }
         }

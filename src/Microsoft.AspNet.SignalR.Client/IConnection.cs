@@ -33,6 +33,7 @@ namespace Microsoft.AspNet.SignalR.Client
         ConnectionState State { get; }
         IClientTransport Transport { get; }
         DateTime LastMessageAt { get; }
+        DateTime LastActiveAt { get; }
 
 #if !PORTABLE
         /// <summary>
@@ -64,6 +65,7 @@ namespace Microsoft.AspNet.SignalR.Client
         void OnConnectionSlow();
         void PrepareRequest(IRequest request);
         void MarkLastMessage();
+        void MarkActive();
         void Trace(TraceLevels level, string format, params object[] args);
     }
 }
